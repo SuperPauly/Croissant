@@ -68,8 +68,8 @@ class Files : ContentProvider() {
         val files = File(Environment.getExternalStorageDirectory().absolutePath + path).listFiles()
         val filesArray = JSONArray()
 
-        if (files == null || path.isEmpty()) {
-            return message("error", "ERR_02: No path provided")
+        if (files == null) {
+            return message("error", "ERR_02: Incorrect path provided")
         }
 
         for (file in files) {

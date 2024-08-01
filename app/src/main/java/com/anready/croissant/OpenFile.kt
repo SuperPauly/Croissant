@@ -1,44 +1,28 @@
 package com.anready.croissant
 
 import android.Manifest
-import android.content.BroadcastReceiver
-import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.provider.Settings
-import android.util.Log
-import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
-import com.anready.croissant.providers.Files
 import java.io.File
 
+class OpenFile : AppCompatActivity() {
 
-class MainActivity : AppCompatActivity() {
-    private lateinit var responseTextView: TextView
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-
-
-        responseTextView = findViewById(R.id.textView)
-        responseTextView.text = if (checkPermission()) {
-            "Permission granted"
-        } else {
-            "No permission"
-        }
-
-        startActivity(Intent(this, OpenFile::class.java).putExtra("path", "/Movies/video.mp4"))
 
         if (!checkPermission()) {
+            Toast.makeText(this, "No permission", Toast.LENGTH_SHORT).show()
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION)
                 val uri = Uri.fromParts("package", packageName, null)
@@ -53,8 +37,37 @@ class MainActivity : AppCompatActivity() {
             }
             return
         }
+
+        val path = this.intent.getStringExtra("path")
+        val file = File(Environment.getExternalStorageDirectory().absolutePath + path)
+        openFile(file)
+
+        finish()
     }
 
+    private fun openFile(file: File) {
+        if (!file.exists()) {
+            Toast.makeText(this, "No file", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val fileUri = Uri.fromFile(file)
+        val contentResolver = contentResolver
+        val mimeType = contentResolver.getType(fileUri)
+
+        val uri = FileProvider.getUriForFile(
+            this,
+            "${BuildConfig.APPLICATION_ID}.provider",
+            file
+        )
+
+        val intent = Intent(Intent.ACTION_VIEW).apply {
+            setDataAndType(uri, mimeType)
+            flags = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK
+        }
+
+        startActivity(intent)
+    }
 
     private fun checkPermission(): Boolean {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
@@ -74,15 +87,21 @@ class MainActivity : AppCompatActivity() {
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (grantResults.isEmpty() || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
-            responseTextView.text = "No permission"
+            Toast.makeText(this, "No permission", Toast.LENGTH_SHORT).show()
         } else {
-            responseTextView.text = "Permission granted"
+            val path = this.intent.getStringExtra("path")
+            val file = File(Environment.getExternalStorageDirectory().absolutePath + path)
+            openFile(file)
+            finish()
         }
     }
 
     private val grantPermissionLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == RESULT_OK) {
-            responseTextView.text = "Permission granted"
+            val path = this.intent.getStringExtra("path")
+            val file = File(Environment.getExternalStorageDirectory().absolutePath + path)
+            openFile(file)
+            finish()
         }
     }
 }

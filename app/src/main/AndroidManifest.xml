@@ -15,6 +15,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Croissant"
+        android:launchMode="standard"
         tools:targetApi="31">
         <activity
             android:name=".MainActivity"
@@ -26,11 +27,25 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".OpenFile"
+            android:exported="true"/>
+
         <provider
             android:name=".providers.Files"
             android:authorities="com.anready.croissant.files"
             android:exported="true"
             tools:ignore="ExportedContentProvider" />
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.provider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
     </application>
 
 </manifest>
