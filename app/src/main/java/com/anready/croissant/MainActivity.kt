@@ -38,6 +38,10 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
+        if (savedInstanceState != null) {
+            path = savedInstanceState.getString("N", "/")
+        }
+
         FileUtils.getObjectsByFolderId(this)
     }
 
@@ -91,6 +95,17 @@ class MainActivity : AppCompatActivity() {
             Toast.makeText(this, "Permission granted", Toast.LENGTH_SHORT).show()
             FileUtils.getObjectsByFolderId(this)
         }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putString("N", path)
+    }
+
+
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        super.onRestoreInstanceState(savedInstanceState)
+        path = savedInstanceState.getString("N", "/")
     }
 
     override fun onBackPressed() {
