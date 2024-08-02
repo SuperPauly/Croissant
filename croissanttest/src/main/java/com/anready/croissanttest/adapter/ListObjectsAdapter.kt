@@ -77,6 +77,7 @@ object FileUtils {
     fun getObjectsByFolderId(activity: Activity) {
         if (!checkPermission(activity)) {
             alertDialog(activity, "No permission granted for app Croissant")
+            return
         }
 
         val fullList = getListOfObjects(activity)

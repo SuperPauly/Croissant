@@ -26,11 +26,6 @@ class Files : ContentProvider() {
         val path = uri.getQueryParameter("path")
         val command = uri.getQueryParameter("command")
 
-        if (!checkPermission()) {
-            cursor.addRow(arrayOf(message("error", "ERR_01: No permission to access external storage")))
-            return cursor
-        }
-
         when (command) {
             "list" -> {
                 cursor.addRow(arrayOf(listObjects(path.toString())))
@@ -65,6 +60,10 @@ class Files : ContentProvider() {
     }
 
     private fun listObjects(path: String): String {
+        if (!checkPermission()) {
+            return message("error", "ERR_01: No permission to access external storage")
+        }
+
         val files = File(Environment.getExternalStorageDirectory().absolutePath + path).listFiles()
         val filesArray = JSONArray()
 
