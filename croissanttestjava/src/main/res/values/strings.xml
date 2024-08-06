@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">CroissantTestJava</string>
+    <string name="type">Type</string>
+</resources>

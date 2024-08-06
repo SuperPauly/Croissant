@@ -1,6 +1,8 @@
 package com.anready.croissanttest
 
+import android.app.Activity
 import android.os.Bundle
+import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.Toast
@@ -27,6 +29,13 @@ class MainActivity : AppCompatActivity() {
             }
 
             path = pathEditText.text.toString()
+
+            val view = currentFocus
+            if (view != null) {
+                val imm = getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+                imm.hideSoftInputFromWindow(view.windowToken, 0)
+            }
+
             FileUtils.getObjectsByFolderId(this)
         }
 
