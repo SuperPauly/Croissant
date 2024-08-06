@@ -33,6 +33,9 @@ class Files : ContentProvider() {
             "isPermissionsGranted" -> {
                 cursor.addRow(arrayOf(message("result", checkPermission())))
             }
+            "pathExist" -> {
+                cursor.addRow(arrayOf(isPathExist(path.toString())))
+            }
             else -> {
                 cursor.addRow(arrayOf(message("error", "ERR_03: Unknown command")))
             }
@@ -80,6 +83,15 @@ class Files : ContentProvider() {
         }
 
         return filesArray.toString()
+    }
+
+    private fun isPathExist(path: String): String {
+        if (!checkPermission()) {
+            return message("error", "ERR_01: No permission to access external storage")
+        }
+
+        val file = File(Environment.getExternalStorageDirectory().absolutePath + path).exists()
+        return message("result", file)
     }
 
     override fun onCreate(): Boolean {

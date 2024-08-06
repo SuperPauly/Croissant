@@ -178,6 +178,43 @@ object FileUtils {
         return false
     }
 
+    fun isPathExist(ac: Activity, path: String): Boolean {
+        val contentResolver: ContentResolver = ac.contentResolver
+        val uri = Uri.parse("content://com.anready.croissant.files")
+            .buildUpon()
+            .appendQueryParameter("path", path)
+            .appendQueryParameter("command", "pathExist")
+            .build()
+
+        var cursor: Cursor? = null
+        try {
+            cursor = contentResolver.query(uri, null, null, null, null)
+            if (cursor != null && cursor.moveToFirst()) {
+                val dataIndex = cursor.getColumnIndex("response")
+                if (dataIndex == -1) {
+                    alertDialog(ac, "Data column not found")
+                    return false
+                }
+
+                val jsonArray = JSONArray(cursor.getString(dataIndex))
+                if (error(jsonArray)) {
+                    alertDialog(ac, "Error: " + jsonArray.getJSONObject(0).getString("error"))
+                    return false
+                }
+
+                val fileInfo = jsonArray.getJSONObject(0)
+                return fileInfo.getBoolean("result")
+            } else {
+                alertDialog(ac, "Error while getting data!")
+            }
+        } catch (e: Exception) {
+            alertDialog(ac, "Error while getting data!\n" + e.message)
+        } finally {
+            cursor?.close()
+        }
+        return false
+    }
+
     private fun alertDialog(ac: Activity, s: String) {
         ac.runOnUiThread {
             val builder = AlertDialog.Builder(ac)

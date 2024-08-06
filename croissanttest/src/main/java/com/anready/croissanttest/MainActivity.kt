@@ -1,6 +1,9 @@
 package com.anready.croissanttest
 
 import android.os.Bundle
+import android.widget.EditText
+import android.widget.ImageView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.anready.croissanttest.adapter.FileUtils
 
@@ -12,6 +15,19 @@ class MainActivity : AppCompatActivity() {
 
         if (savedInstanceState != null) {
             path = savedInstanceState.getString("N", "/")
+        }
+
+        val pathEditText = findViewById<EditText>(R.id.editTextText)
+        pathEditText.setText(path)
+
+        findViewById<ImageView>(R.id.sendPath).setOnClickListener {
+            if (!FileUtils.isPathExist(this, pathEditText.text.toString())) {
+                Toast.makeText(this, "Path doesn't exist", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            path = pathEditText.text.toString()
+            FileUtils.getObjectsByFolderId(this)
         }
 
         FileUtils.getObjectsByFolderId(this)
