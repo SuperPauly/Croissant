@@ -79,6 +79,12 @@ class Files : ContentProvider() {
             fileObject.put("name", file.name)
             fileObject.put("type", file.isDirectory)
             fileObject.put("visibility", file.isHidden)
+            fileObject.put("path", file.path)
+            fileObject.put("absolutePath", file.absolutePath)
+            fileObject.put("lastModified", file.lastModified())
+            if (file.isDirectory) {
+                fileObject.put("freeSpace", file.freeSpace)
+            }
             filesArray.put(fileObject)
         }
 
