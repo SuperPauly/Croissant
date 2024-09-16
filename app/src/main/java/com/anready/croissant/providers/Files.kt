@@ -3,6 +3,7 @@ package com.anready.croissant.providers
 import android.Manifest
 import android.content.ContentProvider
 import android.content.ContentValues
+import android.content.Context
 import android.content.pm.PackageManager
 import android.database.Cursor
 import android.net.Uri
@@ -10,9 +11,13 @@ import android.database.MatrixCursor
 import android.os.Build
 import android.os.Environment
 import androidx.core.content.ContextCompat
+import com.anready.croissant.Constants.LOGS
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class Files : ContentProvider() {
     override fun query(
@@ -25,6 +30,13 @@ class Files : ContentProvider() {
         val cursor = MatrixCursor(arrayOf("response"))
         val path = uri.getQueryParameter("path")
         val command = uri.getQueryParameter("command")
+
+        val sharedPreferences = context?.getSharedPreferences(LOGS, Context.MODE_PRIVATE)
+
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+        val formattedDate = dateFormat.format(Date())
+
+        sharedPreferences?.edit()?.putString("$formattedDate $callingPackage MSG_CODE: 00", command)?.apply()
 
         when (command) {
             "list" -> {
@@ -52,6 +64,13 @@ class Files : ContentProvider() {
 
     private fun checkPermission(): Boolean {
         val context = context ?: return false
+
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+        val formattedDate = dateFormat.format(Date())
+
+        val sharedPreferences = context.getSharedPreferences(LOGS, Context.MODE_PRIVATE)
+
+        sharedPreferences?.edit()?.putString("$formattedDate $callingPackage", "Checking permission")?.apply()
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             Environment.isExternalStorageManager()
         } else {
@@ -63,14 +82,22 @@ class Files : ContentProvider() {
     }
 
     private fun listObjects(path: String): String {
+        val sharedPreferences = context?.getSharedPreferences(LOGS, Context.MODE_PRIVATE)
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+        val formattedDate = dateFormat.format(Date())
+
         if (!checkPermission()) {
+            sharedPreferences?.edit()?.putString("$formattedDate $callingPackage ERR_CODE: 01", "Getting list of files in directory: $path")?.apply()
             return message("error", "ERR_01: No permission to access external storage")
         }
+
+        sharedPreferences?.edit()?.putString("$formattedDate $callingPackage", "Getting list of files in directory: $path")?.apply()
 
         val files = File(Environment.getExternalStorageDirectory().absolutePath + path).listFiles()
         val filesArray = JSONArray()
 
         if (files == null) {
+            sharedPreferences?.edit()?.putString("$formattedDate $callingPackage ERR_CODE: 02", "Getting list of files in directory: $path")?.apply()
             return message("error", "ERR_02: Incorrect path provided")
         }
 
@@ -88,15 +115,22 @@ class Files : ContentProvider() {
             filesArray.put(fileObject)
         }
 
+        sharedPreferences?.edit()?.putString("$formattedDate $callingPackage ERR_CODE: 00", "Getting list of files in directory: $path")?.apply()
         return filesArray.toString()
     }
 
     private fun isPathExist(path: String): String {
+        val sharedPreferences = context?.getSharedPreferences(LOGS, Context.MODE_PRIVATE)
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+        val formattedDate = dateFormat.format(Date())
+
         if (!checkPermission()) {
+            sharedPreferences?.edit()?.putString("$formattedDate $callingPackage ERR_CODE: 01", "Is path exist: $path")?.apply()
             return message("error", "ERR_01: No permission to access external storage")
         }
 
         val file = File(Environment.getExternalStorageDirectory().absolutePath + path).exists()
+        sharedPreferences?.edit()?.putString("$formattedDate $callingPackage ERR_CODE: 00", "Is path exist: $path")?.apply()
         return message("result", file)
     }
 
