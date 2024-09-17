@@ -19,16 +19,16 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <TextView
-        android:id="@+id/logsTv"
-        android:layout_width="match_parent"
-        android:layout_height="300dp"
-        android:layout_marginVertical="28dp"
+    <ListView
+        android:id="@+id/logsLv"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
         android:layout_marginHorizontal="18dp"
-        android:text="logs go here..."
+        android:layout_marginVertical="28dp"
         android:scrollbars="vertical"
-        android:background="@color/black"
-        android:textColor="@color/white"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/title" />
 
     <Button
@@ -36,7 +36,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="36dp"
-        android:layout_marginBottom="108dp"
+        android:layout_marginBottom="8dp"
         android:text="Clear"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
@@ -46,7 +46,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="36dp"
-        android:layout_marginBottom="108dp"
+        android:layout_marginBottom="8dp"
         android:text="Refresh"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
