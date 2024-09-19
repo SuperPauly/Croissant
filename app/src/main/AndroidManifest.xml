@@ -19,6 +19,9 @@
         android:theme="@style/Theme.Croissant"
         tools:targetApi="31">
         <activity
+            android:name=".AppControl"
+            android:exported="false" />
+        <activity
             android:name=".providers.LogsActivity"
             android:exported="false" />
         <activity
