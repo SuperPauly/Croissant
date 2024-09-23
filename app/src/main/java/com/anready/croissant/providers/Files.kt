@@ -11,6 +11,7 @@ import android.database.MatrixCursor
 import android.os.Build
 import android.os.Environment
 import androidx.core.content.ContextCompat
+import com.anready.croissant.Constants.APPS_READ_ACCESS
 import com.anready.croissant.Constants.LOGS
 import org.json.JSONArray
 import org.json.JSONObject
@@ -48,12 +49,19 @@ class Files : ContentProvider() {
             "pathExist" -> {
                 cursor.addRow(arrayOf(isPathExist(path.toString())))
             }
+            "accessToCroissant" -> {
+                cursor.addRow(arrayOf(accessToCroissant()))
+            }
             else -> {
                 cursor.addRow(arrayOf(message("error", "ERR_03: Unknown command")))
             }
         }
 
         return cursor
+    }
+
+    private fun accessToCroissant(): String {
+        return message("result", context?.getSharedPreferences(APPS_READ_ACCESS, Context.MODE_PRIVATE)?.getBoolean(callingPackage, true) == true)
     }
 
     private fun message(type: String, message: Any): String {
@@ -82,6 +90,10 @@ class Files : ContentProvider() {
     }
 
     private fun listObjects(path: String): String {
+        if (context?.getSharedPreferences(APPS_READ_ACCESS, Context.MODE_PRIVATE)?.getBoolean(callingPackage, true) == false) {
+            return message("error", "ERR_05: No permission to access Croissant")
+        }
+
         val sharedPreferences = context?.getSharedPreferences(LOGS, Context.MODE_PRIVATE)
         val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
         val formattedDate = dateFormat.format(Date())
@@ -120,6 +132,10 @@ class Files : ContentProvider() {
     }
 
     private fun isPathExist(path: String): String {
+        if (context?.getSharedPreferences(APPS_READ_ACCESS, Context.MODE_PRIVATE)?.getBoolean(callingPackage, true) == false) {
+            return message("error", "ERR_05: No permission to access Croissant")
+        }
+
         val sharedPreferences = context?.getSharedPreferences(LOGS, Context.MODE_PRIVATE)
         val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
         val formattedDate = dateFormat.format(Date())

@@ -1,26 +1,37 @@
 package com.anready.croissant.providers
 
 import android.Manifest
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Binder
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.provider.Settings
+import android.view.LayoutInflater
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import com.anready.croissant.BuildConfig
+import com.anready.croissant.Constants.APPS_READ_ACCESS
+import com.anready.croissant.R
+import com.google.android.material.switchmaterial.SwitchMaterial
 import java.io.File
 
 class OpenFile : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        if (getSharedPreferences(APPS_READ_ACCESS, Context.MODE_PRIVATE)?.getBoolean(callingActivity?.packageName, true) == false) {
+            Toast.makeText(this, "ERR_05: No permission to access Croissant", Toast.LENGTH_SHORT).show()
+        }
 
         if (!checkPermission()) {
             Toast.makeText(this, "No permission", Toast.LENGTH_SHORT).show()

@@ -4,51 +4,57 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.BaseAdapter
 import android.widget.ImageView
-import android.widget.Switch
+import com.google.android.material.switchmaterial.SwitchMaterial
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
-import androidx.recyclerview.widget.RecyclerView
+import com.anready.croissant.Constants.APPS_READ_ACCESS
 import com.anready.croissant.R
 
-class AppAdapter(private val context: Context, private val appList: List<AppModel>) :
-    RecyclerView.Adapter<AppAdapter.ViewHolder>() {
+class AppAdapter(private val context: Context, private val appList: List<AppModel>) : BaseAdapter() {
 
-    inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val appIcon: ImageView = view.findViewById(R.id.imageView)
-        val appName: TextView = view.findViewById(R.id.textView)
-    }
+    override fun getCount(): Int = appList.size
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.select_file_item, parent, false)
-        return ViewHolder(view)
-    }
+    override fun getItem(position: Int): Any = appList[position]
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+    override fun getItemId(position: Int): Long = position.toLong()
+
+    override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
+        val view: View = convertView ?: LayoutInflater.from(context).inflate(R.layout.select_file_item, parent, false)
+
+        val appIcon = view.findViewById<ImageView>(R.id.imageView)
+        val appName = view.findViewById<TextView>(R.id.textView)
+
         val app = appList[position]
-        holder.appName.text = app.name
-        holder.appIcon.setImageDrawable(app.icon)
+        appIcon.setImageDrawable(app.icon)
+        "${app.name} (${app.packageName})".also { appName.text = it }
 
-        holder.itemView.setOnClickListener {
-            showAppDialog(context)
+        view.setOnClickListener {
+            showAppDialog(context, app.packageName)
         }
+
+        return view
     }
 
-    private fun showAppDialog(context: Context) {
+    private fun showAppDialog(context: Context, packageName: String) {
         val builder = AlertDialog.Builder(context)
         val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_layout, null)
 
-        val switchButton = dialogView.findViewById<Switch>(R.id.switchButton)
+        val sharedPreferences = context.getSharedPreferences(APPS_READ_ACCESS, Context.MODE_PRIVATE)
+
+        val switchButton = dialogView.findViewById<SwitchMaterial>(R.id.switchButton)
+        switchButton.isChecked = sharedPreferences.getBoolean(packageName, true)
+        switchButton.setOnCheckedChangeListener { _, isChecked ->
+            sharedPreferences.edit().putBoolean(packageName, isChecked).apply()
+        }
+
         builder.setView(dialogView)
-            .setPositiveButton("OK") { dialog, id ->
-                // Обработка нажатия кнопки OK
+            .setPositiveButton("OK") { dialog, _ ->
+                dialog.dismiss()
             }
 
         val dialog = builder.create()
         dialog.show()
-    }
-
-    override fun getItemCount(): Int {
-        return appList.size
     }
 }

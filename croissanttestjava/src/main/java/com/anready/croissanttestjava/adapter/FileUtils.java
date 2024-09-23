@@ -21,6 +21,10 @@ import java.util.List;
 public class FileUtils {
 
     public static void getObjectsByFolderId(Activity activity) {
+        if (!accessToCroissant(activity)) {
+            alertDialog(activity, "This app can't connect with Croissant, please provide permission in App Croissant");
+        }
+
         if (!checkPermission(activity)) {
             alertDialog(activity, "No permission granted for app Croissant");
             return;
@@ -97,6 +101,43 @@ public class FileUtils {
         Uri uri = Uri.parse("content://com.anready.croissant.files")
                 .buildUpon()
                 .appendQueryParameter("command", "isPermissionsGranted")
+                .build();
+
+        Cursor cursor = null;
+        try {
+            cursor = contentResolver.query(uri, null, null, null, null);
+            if (cursor != null && cursor.moveToFirst()) {
+                int dataIndex = cursor.getColumnIndex("response");
+                if (dataIndex == -1) {
+                    alertDialog(ac, "Data column not found");
+                    return false;
+                }
+
+                JSONArray jsonArray = new JSONArray(cursor.getString(dataIndex));
+                if (error(jsonArray)) {
+                    alertDialog(ac, "Error: " + jsonArray.getJSONObject(0).getString("error"));
+                    return false;
+                }
+
+                return jsonArray.getJSONObject(0).getBoolean("result");
+            } else {
+                alertDialog(ac, "Error while getting data!");
+            }
+        } catch (Exception e) {
+            alertDialog(ac, "Error while getting data!\n" + e.getMessage());
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+        return false;
+    }
+
+    private static boolean accessToCroissant(Activity ac) {
+        ContentResolver contentResolver = ac.getContentResolver();
+        Uri uri = Uri.parse("content://com.anready.croissant.files")
+                .buildUpon()
+                .appendQueryParameter("command", "accessToCroissant")
                 .build();
 
         Cursor cursor = null;

@@ -50,8 +50,10 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(this, LogsActivity::class.java))
         }
 
-        //if someone interesting to do a normal user interface for logs
-        startActivity(Intent(this, AppControl::class.java))
+        val appControl = findViewById<com.google.android.material.floatingactionbutton.FloatingActionButton>(R.id.floatingActionButton2)
+        appControl.setOnClickListener {
+            startActivity(Intent(this, AppControl::class.java))
+        }
     }
 
     private fun requestPermission() {

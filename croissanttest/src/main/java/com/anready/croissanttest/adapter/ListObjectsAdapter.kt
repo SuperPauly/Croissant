@@ -75,6 +75,10 @@ class ListObjectsAdapter(
 
 object FileUtils {
     fun getObjectsByFolderId(activity: Activity) {
+        if (!accessToCroissant(activity)) {
+            alertDialog(activity, "This app can't connect with Croissant, please provide permission in App Croissant")
+        }
+
         if (!checkPermission(activity)) {
             alertDialog(activity, "No permission granted for app Croissant")
             return
@@ -233,5 +237,41 @@ object FileUtils {
         } catch (e: JSONException) {
             return false
         }
+    }
+
+    private fun accessToCroissant(ac: Activity): Boolean {
+        val contentResolver: ContentResolver = ac.contentResolver
+        val uri = Uri.parse("content://com.anready.croissant.files")
+            .buildUpon()
+            .appendQueryParameter("command", "accessToCroissant")
+            .build()
+
+        var cursor: Cursor? = null
+        try {
+            cursor = contentResolver.query(uri, null, null, null, null)
+            if (cursor != null && cursor.moveToFirst()) {
+                val dataIndex = cursor.getColumnIndex("response")
+                if (dataIndex == -1) {
+                    alertDialog(ac, "Data column not found")
+                    return false
+                }
+
+                val jsonArray = JSONArray(cursor.getString(dataIndex))
+                if (error(jsonArray)) {
+                    alertDialog(ac, "Error: " + jsonArray.getJSONObject(0).getString("error"))
+                    return false
+                }
+
+                val fileInfo = jsonArray.getJSONObject(0)
+                return fileInfo.getBoolean("result")
+            } else {
+                alertDialog(ac, "Error while getting data!")
+            }
+        } catch (e: Exception) {
+            alertDialog(ac, "Error while getting data!\n" + e.message)
+        } finally {
+            cursor?.close()
+        }
+        return false
     }
 }
