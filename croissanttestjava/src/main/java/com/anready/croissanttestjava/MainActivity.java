@@ -1,6 +1,7 @@
 package com.anready.croissanttestjava;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -49,6 +50,19 @@ public class MainActivity extends Activity {
 
         FileUtils.getObjectsByFolderId(this);
     }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == 123) {
+            if (resultCode == 6) {
+                String errorMessage = data.getStringExtra("ERR");
+                Toast.makeText(this, errorMessage, Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
 
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {

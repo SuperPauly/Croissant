@@ -20,6 +20,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import com.anready.croissant.BuildConfig
 import com.anready.croissant.Constants.APPS_READ_ACCESS
+import com.anready.croissant.Constants.OPEN_FILES
 import com.anready.croissant.R
 import com.google.android.material.switchmaterial.SwitchMaterial
 import java.io.File
@@ -29,8 +30,8 @@ class OpenFile : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        if (getSharedPreferences(APPS_READ_ACCESS, Context.MODE_PRIVATE)?.getBoolean(callingActivity?.packageName, true) == false) {
-            Toast.makeText(this, "ERR_05: No permission to access Croissant", Toast.LENGTH_SHORT).show()
+        if (getSharedPreferences(OPEN_FILES, Context.MODE_PRIVATE)?.getBoolean(callingActivity?.packageName, true) == false) {
+            setResult(6, Intent().putExtra("ERR", "ERR_06: No permission to open files"))
         }
 
         if (!checkPermission()) {
@@ -54,6 +55,7 @@ class OpenFile : AppCompatActivity() {
         val file = File(Environment.getExternalStorageDirectory().absolutePath + path)
         openFile(file)
 
+        setResult(0)
         finish()
     }
 

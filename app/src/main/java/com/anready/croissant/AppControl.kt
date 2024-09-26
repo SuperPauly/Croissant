@@ -14,10 +14,14 @@ class AppControl : AppCompatActivity() {
         setContentView(R.layout.activity_app_control)
 
         val listView = findViewById<ListView>(R.id.recyclerView)
-        val appList = getInstalledApps()
 
-        val adapter = AppAdapter(this, appList)
-        listView.adapter = adapter
+        Thread {
+            val appList = getInstalledApps()
+            runOnUiThread {
+                val adapter = AppAdapter(this, appList)
+                listView.adapter = adapter
+            }
+        }.start()
     }
 
     private fun getInstalledApps(): List<AppModel> {

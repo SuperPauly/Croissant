@@ -67,7 +67,7 @@ public class ListObjectsAdapter extends BaseAdapter {
                 Intent intent = new Intent();
                 intent.setClassName("com.anready.croissant", "com.anready.croissant.providers.OpenFile");
                 intent.putExtra("path", act.getPath() + "/" + entry.name);
-                ac.startActivity(intent);
+                ac.startActivityForResult(intent, 123);
             }
         });
 

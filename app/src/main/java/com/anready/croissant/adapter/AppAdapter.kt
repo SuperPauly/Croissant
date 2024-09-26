@@ -10,6 +10,7 @@ import com.google.android.material.switchmaterial.SwitchMaterial
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import com.anready.croissant.Constants.APPS_READ_ACCESS
+import com.anready.croissant.Constants.OPEN_FILES
 import com.anready.croissant.R
 
 class AppAdapter(private val context: Context, private val appList: List<AppModel>) : BaseAdapter() {
@@ -31,22 +32,35 @@ class AppAdapter(private val context: Context, private val appList: List<AppMode
         "${app.name} (${app.packageName})".also { appName.text = it }
 
         view.setOnClickListener {
-            showAppDialog(context, app.packageName)
+            showAppDialog(context, app)
         }
 
         return view
     }
 
-    private fun showAppDialog(context: Context, packageName: String) {
+    private fun showAppDialog(context: Context, app: AppModel) {
         val builder = AlertDialog.Builder(context)
         val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_layout, null)
 
-        val sharedPreferences = context.getSharedPreferences(APPS_READ_ACCESS, Context.MODE_PRIVATE)
+        val read = context.getSharedPreferences(APPS_READ_ACCESS, Context.MODE_PRIVATE)
+        val open = context.getSharedPreferences(OPEN_FILES, Context.MODE_PRIVATE)
+
+        val icon = dialogView.findViewById<ImageView>(R.id.imageView2)
+        icon.setImageDrawable(app.icon)
+
+        val name = dialogView.findViewById<TextView>(R.id.textView2)
+        "${app.name} (${app.packageName})".also { name.text = it }
 
         val switchButton = dialogView.findViewById<SwitchMaterial>(R.id.switchButton)
-        switchButton.isChecked = sharedPreferences.getBoolean(packageName, true)
+        switchButton.isChecked = read.getBoolean(app.packageName, true)
         switchButton.setOnCheckedChangeListener { _, isChecked ->
-            sharedPreferences.edit().putBoolean(packageName, isChecked).apply()
+            read.edit().putBoolean(app.packageName, isChecked).apply()
+        }
+
+        val openFiles = dialogView.findViewById<SwitchMaterial>(R.id.switchButton2)
+        openFiles.isChecked = open.getBoolean(app.packageName, true)
+        openFiles.setOnCheckedChangeListener { _, isChecked ->
+            open.edit().putBoolean(app.packageName, isChecked).apply()
         }
 
         builder.setView(dialogView)
