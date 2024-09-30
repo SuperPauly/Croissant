@@ -13,6 +13,7 @@ import android.os.Environment
 import androidx.core.content.ContextCompat
 import com.anready.croissant.Constants.APPS_READ_ACCESS
 import com.anready.croissant.Constants.LOGS
+import com.anready.croissant.Constants.OPEN_FILES
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
@@ -52,12 +53,19 @@ class Files : ContentProvider() {
             "accessToCroissant" -> {
                 cursor.addRow(arrayOf(accessToCroissant()))
             }
+            "accessToOpenFiles" -> {
+                cursor.addRow(arrayOf(accessToOpenFiles()))
+            }
             else -> {
                 cursor.addRow(arrayOf(message("error", "ERR_03: Unknown command")))
             }
         }
 
         return cursor
+    }
+
+    private fun accessToOpenFiles(): String {
+        return message("result", context?.getSharedPreferences(OPEN_FILES, Context.MODE_PRIVATE)?.getBoolean(callingPackage, true) == true)
     }
 
     private fun accessToCroissant(): String {

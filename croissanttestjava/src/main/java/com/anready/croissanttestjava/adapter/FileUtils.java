@@ -170,6 +170,43 @@ public class FileUtils {
         return false;
     }
 
+    public static boolean accessToOpenFiles(Activity ac) {
+        ContentResolver contentResolver = ac.getContentResolver();
+        Uri uri = Uri.parse("content://com.anready.croissant.files")
+                .buildUpon()
+                .appendQueryParameter("command", "accessToOpenFiles")
+                .build();
+
+        Cursor cursor = null;
+        try {
+            cursor = contentResolver.query(uri, null, null, null, null);
+            if (cursor != null && cursor.moveToFirst()) {
+                int dataIndex = cursor.getColumnIndex("response");
+                if (dataIndex == -1) {
+                    alertDialog(ac, "Data column not found");
+                    return false;
+                }
+
+                JSONArray jsonArray = new JSONArray(cursor.getString(dataIndex));
+                if (error(jsonArray)) {
+                    alertDialog(ac, "Error: " + jsonArray.getJSONObject(0).getString("error"));
+                    return false;
+                }
+
+                return jsonArray.getJSONObject(0).getBoolean("result");
+            } else {
+                alertDialog(ac, "Error while getting data!");
+            }
+        } catch (Exception e) {
+            alertDialog(ac, "Error while getting data!\n" + e.getMessage());
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+        return false;
+    }
+
     public static boolean isPathExist(Activity ac, String path) {
         ContentResolver contentResolver = ac.getContentResolver();
         Uri uri = Uri.parse("content://com.anready.croissant.files")
@@ -208,7 +245,7 @@ public class FileUtils {
         return false;
     }
 
-    private static void alertDialog(Activity ac, String s) {
+    public static void alertDialog(Activity ac, String s) {
         ac.runOnUiThread(() -> {
             AlertDialog.Builder builder = new AlertDialog.Builder(ac);
             builder.setTitle("Error");

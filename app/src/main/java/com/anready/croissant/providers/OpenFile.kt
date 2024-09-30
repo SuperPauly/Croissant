@@ -5,24 +5,18 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
-import android.os.Binder
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.provider.Settings
-import android.view.LayoutInflater
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import com.anready.croissant.BuildConfig
-import com.anready.croissant.Constants.APPS_READ_ACCESS
 import com.anready.croissant.Constants.OPEN_FILES
-import com.anready.croissant.R
-import com.google.android.material.switchmaterial.SwitchMaterial
 import java.io.File
 
 class OpenFile : AppCompatActivity() {
@@ -30,8 +24,24 @@ class OpenFile : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        if (getSharedPreferences(OPEN_FILES, Context.MODE_PRIVATE)?.getBoolean(callingActivity?.packageName, true) == false) {
+        var callingPackage = this.callingActivity?.packageName
+
+        if (callingPackage == null) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
+                callingPackage = this.referrer?.authority.toString()
+            }
+
+            if (callingPackage == null) {
+                setResult(6, Intent().putExtra("ERR", "ERR_07: Incorrect running of Croissant"))
+                this.finish()
+                return
+            }
+        }
+
+        if (getSharedPreferences(OPEN_FILES, Context.MODE_PRIVATE)?.getBoolean(callingPackage, true) == false) {
             setResult(6, Intent().putExtra("ERR", "ERR_06: No permission to open files"))
+            this.finish()
+            return
         }
 
         if (!checkPermission()) {

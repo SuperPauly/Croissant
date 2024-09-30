@@ -30,6 +30,10 @@ public class MainActivity extends Activity {
         pathEditText = findViewById(R.id.editTextText);
         pathEditText.setText(path);
 
+        if (FileUtils.accessToOpenFiles(this)) {
+            FileUtils.alertDialog(this, "This app can't open files by Croissant. Please give us this permission");
+        }
+
         ImageView sendPath = findViewById(R.id.sendPath);
         sendPath.setOnClickListener(v -> {
             if (!FileUtils.isPathExist(MainActivity.this, pathEditText.getText().toString())) {
