@@ -9,6 +9,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.provider.Settings
+import android.webkit.MimeTypeMap
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -38,7 +39,7 @@ class OpenFile : AppCompatActivity() {
             }
         }
 
-        if (getSharedPreferences(OPEN_FILES, Context.MODE_PRIVATE)?.getBoolean(callingPackage, false) == false) {
+        if (getSharedPreferences(OPEN_FILES, Context.MODE_PRIVATE)?.getBoolean(callingPackage, false) == false && callingPackage != "com.anready.croissant") {
             setResult(6, Intent().putExtra("ERR", "ERR_06: No permission to open files"))
             this.finish()
             return
@@ -62,7 +63,10 @@ class OpenFile : AppCompatActivity() {
         }
 
         val path = this.intent.getStringExtra("path")
-        val file = File(Environment.getExternalStorageDirectory().absolutePath + path)
+
+        val sanitizedPath = path?.trimStart('/')
+        val file = File(Environment.getExternalStorageDirectory(), sanitizedPath)
+
         openFile(file)
 
         setResult(0)
@@ -75,23 +79,31 @@ class OpenFile : AppCompatActivity() {
             return
         }
 
-        val fileUri = Uri.fromFile(file)
-        val contentResolver = contentResolver
-        val mimeType = contentResolver.getType(fileUri)
-
         val uri = FileProvider.getUriForFile(
             this,
             "${BuildConfig.APPLICATION_ID}.provider",
             file
         )
 
+        val mimeType = contentResolver.getType(uri)
+            ?: MimeTypeMap.getSingleton().getMimeTypeFromExtension(file.extension)
+            ?: run {
+                Toast.makeText(this, "Cannot determine file type", Toast.LENGTH_SHORT).show()
+                return
+            }
+
         val intent = Intent(Intent.ACTION_VIEW).apply {
             setDataAndType(uri, mimeType)
             flags = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK
         }
 
-        startActivity(intent)
+        try {
+            startActivity(intent)
+        } catch (e: Exception) {
+            Toast.makeText(this, "No app to open this file", Toast.LENGTH_SHORT).show()
+        }
     }
+
 
     private fun checkPermission(): Boolean {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
