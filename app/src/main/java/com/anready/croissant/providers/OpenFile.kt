@@ -39,7 +39,7 @@ class OpenFile : AppCompatActivity() {
             }
         }
 
-        if (getSharedPreferences(OPEN_FILES, Context.MODE_PRIVATE)?.getBoolean(callingPackage, false) == false && callingPackage != "com.anready.croissant") {
+        if (getSharedPreferences(OPEN_FILES, Context.MODE_PRIVATE)?.getBoolean(callingPackage, false) == false && callingPackage != BuildConfig.APPLICATION_ID) {
             setResult(6, Intent().putExtra("ERR", "ERR_06: No permission to open files"))
             this.finish()
             return
