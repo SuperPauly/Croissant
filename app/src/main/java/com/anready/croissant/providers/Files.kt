@@ -66,11 +66,11 @@ class Files : ContentProvider() {
     }
 
     private fun accessToOpenFiles(): String {
-        return message("result", context?.getSharedPreferences(OPEN_FILES, Context.MODE_PRIVATE)?.getBoolean(callingPackage, false) == true)
+        return message("result", context?.getSharedPreferences(OPEN_FILES, Context.MODE_PRIVATE)?.getBoolean(callingPackage, false) == true || isYantra())
     }
 
     private fun accessToCroissant(): String {
-        return message("result", context?.getSharedPreferences(APPS_READ_ACCESS, Context.MODE_PRIVATE)?.getBoolean(callingPackage, false) == true)
+        return message("result", context?.getSharedPreferences(APPS_READ_ACCESS, Context.MODE_PRIVATE)?.getBoolean(callingPackage, false) == true || isYantra())
     }
 
     private fun message(type: String, message: Any): String {
@@ -104,7 +104,7 @@ class Files : ContentProvider() {
         val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
         val formattedDate = dateFormat.format(Date())
 
-        if (context?.getSharedPreferences(APPS_READ_ACCESS, Context.MODE_PRIVATE)?.getBoolean(callingPackage, false) == false) {
+        if (context?.getSharedPreferences(APPS_READ_ACCESS, Context.MODE_PRIVATE)?.getBoolean(callingPackage, false) == false && !isYantra()) {
             sharedPreferences?.edit()?.putString("$formattedDate $callingPackage ERR_CODE: 05",
                 context?.getString(
                     R.string.no_permission_to_access_croissant
@@ -155,12 +155,26 @@ class Files : ContentProvider() {
         return filesArray.toString()
     }
 
+    private fun isYantra(): Boolean {
+        val pm = context?.packageManager
+        val installer = pm?.getInstallerPackageName(callingPackage!!)
+
+        if (callingPackage!! == "com.coderGtm.yantra.pro") {
+            if (installer == "com.android.vending") {
+                return true
+
+            }
+        }
+
+        return false
+    }
+
     private fun isPathExist(path: String): String {
         val sharedPreferences = context?.getSharedPreferences(LOGS, Context.MODE_PRIVATE)
         val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
         val formattedDate = dateFormat.format(Date())
 
-        if (context?.getSharedPreferences(APPS_READ_ACCESS, Context.MODE_PRIVATE)?.getBoolean(callingPackage, true) == false) {
+        if (context?.getSharedPreferences(APPS_READ_ACCESS, Context.MODE_PRIVATE)?.getBoolean(callingPackage, true) == false && !isYantra()) {
             sharedPreferences?.edit()?.putString("$formattedDate $callingPackage ERR_CODE: 05", context?.getString(R.string.no_permission_to_access_croissant))?.apply()
             return message("error", "ERR_05: No permission to access Croissant")
         }

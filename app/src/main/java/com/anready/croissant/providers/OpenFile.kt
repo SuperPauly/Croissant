@@ -72,7 +72,7 @@ class OpenFile : AppCompatActivity() {
             }
         }
 
-        if (getSharedPreferences(OPEN_FILES, MODE_PRIVATE)?.getBoolean(callingPackage, false) == false && callingPackage != BuildConfig.APPLICATION_ID) {
+        if (getSharedPreferences(OPEN_FILES, MODE_PRIVATE)?.getBoolean(callingPackage, false) == false && callingPackage != BuildConfig.APPLICATION_ID  && !isYantra(callingPackage)) {
             setResult(6, Intent().putExtra("ERR", "ERR_06: No permission to open files"))
             this.finish()
             return
@@ -104,6 +104,19 @@ class OpenFile : AppCompatActivity() {
 
         setResult(0)
        // finish() DO NOT EVEN TOUCH THIS FUCKING LINE!!! I WAS SEARCHING WHERE IS BUG ALMOST 2 HOURS, BUG HERE
+    }
+
+    private fun isYantra(string: String): Boolean {
+        val pm = packageManager
+        val installer = pm?.getInstallerPackageName(string)
+
+        if (string == "com.coderGtm.yantra.pro") {
+            if (installer == "com.android.vending") {
+                return true
+            }
+        }
+
+        return false
     }
 
     private fun openFile(file: File) {
